@@ -1,35 +1,35 @@
-import { useState } from "react";
+/* eslint-disable no-unused-vars */
+import React, { useState } from "react";
 import "./ConferenceEvent.css";
 import TotalCost from "./TotalCost";
+import { toggleMealSelection } from "./mealsSlice";
+import { incrementAvQuantity, decrementAvQuantity } from "./avSlice";
 import { useSelector, useDispatch } from "react-redux";
 import { incrementQuantity, decrementQuantity } from "./venueSlice";
-import { decrementAvQuantity, incrementAvQuantity } from "./avSlice";
-import { toggleMealSelection } from "./mealsSlice";
 
 const ConferenceEvent = () => {
-    const [showitems, setShowitems] = useState(false);
+    const [showItems, setShowItems] = useState(false);
     const [numberOfPeople, setNumberOfPeople] = useState(1);
-    const venueitems = useSelector((state) => state.venue);
-    const avitems = useSelector((state) => state.av);
+    const venueItems = useSelector((state) => state.venue);
+    const avItems = useSelector((state) => state.av);
+    const mealsItems = useSelector ((state) => state.meals)
     const dispatch = useDispatch();
-    const remainingAuditoriumQuantity = 3 - venueitems.find(item => item.name === "Auditorium Hall (Capacity:200)").quantity;
-    const mealsitems = useSelector ((state) => state.meals)
-
+    const remainingAuditoriumQuantity = 3 - venueItems.find(item => item.name === "Auditorium Hall (Capacity:200)").quantity;
     
     const handleToggleitems = () => {
         console.log("handleToggleitems called");
-        setShowitems(!showitems);
+        setShowItems(!showItems);
     };
 
     const handleAddToCart = (index) => {
-        if (venueitems[index].name === "Auditorium Hall (Capacity:200)" && venueitems[index].quantity >= 3) {
+        if (venueItems[index].name === "Auditorium Hall (Capacity:200)" && venueItems[index].quantity >= 3) {
           return; 
         }
         dispatch(incrementQuantity(index));
       };
     
       const handleRemoveFromCart = (index) => {
-        if (venueitems[index].quantity > 0) {
+        if (venueItems[index].quantity > 0) {
           dispatch(decrementQuantity(index));
         }
       };
@@ -42,7 +42,7 @@ const ConferenceEvent = () => {
     };
 
     const handleMealSelection = (index) => {
-      const item = mealsitems[index];
+      const item = mealsItems[index];
       if (item.selected && item.type === "mealForPeople"){
         // Ensure numberOfPeople is set before toggling section
         const newNumberOfPeople = item.selected ? numberOfPeople : 0;
@@ -55,30 +55,30 @@ const ConferenceEvent = () => {
 
     const getitemsFromTotalCost = () => {
         const items = [];
-        venueitems.forEach((item) => {
+        venueItems.forEach((item) => {
           if (item.quantity > 0) {
-            item.push({ ...item, type: "venue"});
+            items.push({ ...item, type: "venue"});
           }
         });
-        avitems.forEach((item) => {
+        avItems.forEach((item) => {
           if (
-            item.quantity > 0 && !items.some((i) => i.name === item.name && i.type === "av")
+            items.quantity > 0 && !items.some((i) => i.name === item.name && i.type === "av")
           ) {
-            item.push({ ...item, type: "av"});
+            items.push({ ...item, type: "av"});
           }
         });
-        mealsitems.forEach((item) => {
+        mealsItems.forEach((item) => {
           if(item.selected) {
             const itemForDisplay = { ...item, type: "meals"};
             if (item.numberOfPeople) {
               itemForDisplay.numberOfPeople = numberOfPeople;
             }
-            item.push(itemForDisplay);
+            items.push(itemForDisplay);
           }
         });
         return items;
     };
-
+  
     const items = getitemsFromTotalCost();
 
     const ItemsDisplay = ({ items }) => {
@@ -115,15 +115,15 @@ const ConferenceEvent = () => {
     const calculateTotalCost = (section) => {
         let totalCost = 0;
         if (section === "venue") {
-          venueitems.forEach((item) => {
+          venueItems.forEach((item) => {
             totalCost += item.cost * item.quantity;
           });
         } else if (section === "av"){
-          avitems.forEach((item) => {
+          avItems.forEach((item) => {
             totalCost += item.cost * item.quantity;
           });
         } else if(section === "meals"){
-          mealsitems.forEach((item) => {
+          mealsItems.forEach((item) => {
             if (item.selected) {
               totalCost += item.cost * numberOfPeople;
             }
@@ -140,8 +140,8 @@ const ConferenceEvent = () => {
 
     const navigateToProducts = (idType) => {
         if (idType == '#venue' || idType == '#addons' || idType == '#meals') {
-          if (showitems) { // Check if showitems is false
-            setShowitems(!showitems); // Toggle showitems to true only if it's currently false
+          if (showItems) { // Check if showitems is false
+            setShowItems(!showItems); // Toggle showitems to true only if it's currently false
           }
         }
       }
@@ -162,13 +162,13 @@ const ConferenceEvent = () => {
                         <a href="#addons" onClick={() => navigateToProducts('#addons')}>Add-ons</a>
                         <a href="#meals" onClick={() => navigateToProducts('#meals')}>Meals</a>
                     </div>
-                    <button className="details_button" onClick={() => setShowitems(!showitems)}>
+                    <button className="details_button" onClick={() => setShowItems(!showItems)}>
                         Show Details
                     </button>
                 </div>
             </navbar>
             <div className="main_container">
-                {!showitems
+                {!showItems
                     ?
                     (
                         <div className="items-information">
@@ -178,7 +178,7 @@ const ConferenceEvent = () => {
           <h1>Venue Room Selection</h1>
         </div>
         <div className="venue_selection">
-          {venueitems.map((item, index) => (
+          {venueItems.map((item, index) => (
             <div className="venue_main" key={index}>
               <div className="img">
                 <img src={item.img} alt={item.name} />
@@ -186,17 +186,17 @@ const ConferenceEvent = () => {
               <div className="text">{item.name}</div>
               <div>${item.cost}</div>
       <div className="button_container">
-        {venueitems[index].name === "Auditorium Hall (Capacity:200)" ? (
+        {venueItems[index].name === "Auditorium Hall (Capacity:200)" ? (
 
           <>
           <button
-            className={venueitems[index].quantity === 0 ? "btn-warning btn-disabled" : "btn-minus btn-warning"}
+            className={venueItems[index].quantity === 0 ? "btn-warning btn-disabled" : "btn-minus btn-warning"}
             onClick={() => handleRemoveFromCart(index)}
           >
             &#8211;
           </button>
           <span className="selected_count">
-            {venueitems[index].quantity > 0 ? ` ${venueitems[index].quantity}` : "0"}
+            {venueItems[index].quantity > 0 ? ` ${venueItems[index].quantity}` : "0"}
           </span>
           <button
             className={remainingAuditoriumQuantity === 0? "btn-success btn-disabled" : "btn-success btn-plus"}
@@ -208,16 +208,16 @@ const ConferenceEvent = () => {
         ) : (
           <div className="button_container">
             <button
-              className={venueitems[index].quantity ===0 ? " btn-warning btn-disabled" : "btn-warning btn-plus"}
+              className={venueItems[index].quantity ===0 ? " btn-warning btn-disabled" : "btn-warning btn-plus"}
               onClick={() => handleRemoveFromCart(index)}
             >
               &#8211;
             </button>
             <span className="selected_count">
-              {venueitems[index].quantity > 0 ? ` ${venueitems[index].quantity}` : "0"}
+              {venueItems[index].quantity > 0 ? ` ${venueItems[index].quantity}` : "0"}
             </span>
             <button
-              className={venueitems[index].quantity === 10 ? " btn-success btn-disabled" : "btn-success btn-plus"}
+              className={venueItems[index].quantity === 10 ? " btn-success btn-disabled" : "btn-success btn-plus"}
               onClick={() => handleAddToCart(index)}
             >
               &#43;
@@ -244,7 +244,7 @@ const ConferenceEvent = () => {
 
                                 </div>
                                 <div className="addons_selection">
-                                  {avitems.map((item, index) => (
+                                  {avItems.map((item, index) => (
                                     <div className="av_data venue_main" key={index}>
                                       <div className="img">
                                         <img src={item.img} alt={item.name} />
@@ -255,7 +255,7 @@ const ConferenceEvent = () => {
                                 <div className="addons_btn">
                                   <button className="btn-warning" onClick={() => handleDecrementAvQuantity(index)}> &ndash; </button>
                                   <span className="quantity-value"> {item.quantity} </span>
-                                  <button className="btn-success" onClick={() => handleincrementAvQuantity}> &#43; </button>
+                                  <button className="btn-success" onClick={() => handleincrementAvQuantity(index)}> &#43; </button>
                                 </div>
                             </div>
                           ))}
@@ -289,7 +289,7 @@ const ConferenceEvent = () => {
                                   />
                                 </div>
                                 <div className="meal_selection">
-                                  {mealsitems.map((item, index) => (
+                                  {mealsItems.map((item, index) => (
                                     <div className="meal_item" key={index} style={{ padding: 15 }}>
                                       <div className="inner">
                                         <input type="checkbox" id={`meal_${index}`} 
