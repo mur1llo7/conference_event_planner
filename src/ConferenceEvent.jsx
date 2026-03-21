@@ -62,7 +62,7 @@ const ConferenceEvent = () => {
         });
         avItems.forEach((item) => {
           if (
-            items.quantity > 0 && !items.some((i) => i.name === item.name && i.type === "av")
+            item.quantity > 0 && !items.some((i) => i.name === item.name && i.type === "av")
           ) {
             items.push({ ...item, type: "av"});
           }
@@ -150,7 +150,7 @@ const ConferenceEvent = () => {
         venue: venueTotalCost,
         av: avTotalCost,
         meals: mealsTotalCost,
-    }
+    };
 
     return (
         <>
